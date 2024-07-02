@@ -220,60 +220,33 @@
                 marker = new L.Marker(new L.latLng(loc), {
                     title: title
                 })
-            markersLayer.addLayer(marker)
+            // markersLayer.addLayer(marker)
 
-        // Loop through datas (assuming it contains spot data)
-        for (var i = 0; i < datas.length; i++) {
-            var spot = datas[i];
-            var title = spot.title;
-            var loc = spot.loc;
 
-            // Determine icon based on poverty class
-            var iconUrl;
-            switch (spot.povertyClass) {
-                case 'Miskin': // Adjust with the correct value based on your dropdown options
-                    iconUrl = '{{ asset('iconMarkers/miskin.png') }}';
-                    break;
-                case 'Menengah': // Adjust with the correct value based on your dropdown options
-                    iconUrl = '{{ asset('/assets/iconMarkers/menengah.png') }}';
-                    break;
-                case 'Kaya': // Adjust with the correct value based on your dropdown options
-                    iconUrl = '{{ asset('iconMarkers/kaya.png') }}';
-                    break;
-                default:
-                    iconUrl = '{{ asset('iconMarkers/url_to_default_icon.png') }}'; // Default icon if class is unknown
-            }
-            // Create custom icon for the spot marker
-            var customIcon = L.icon({
-                iconUrl: iconUrl,
-                iconSize: [32, 32], // Adjust as needed
-                iconAnchor: [16, 32], // Adjust as needed
-                popupAnchor: [0, -32] // Adjust as needed
-            });
+            @foreach ($spot as $item)
+                var iconUrl;
+                @switch($item->kelas_kemiskinan)
+                    @case('Miskin')
+                        iconUrl = '{{ asset('iconMarkers/miskin.png') }}';
+                        @break
+                    @case('Menengah')
+                        iconUrl = '{{ asset('iconMarkers/menengah.png') }}';
+                        @break
+                    @case('Kaya')
+                        iconUrl = '{{ asset('iconMarkers/kaya.png') }}';
+                        @break
+                    @default
+                    iconUrl = '{{ asset('iconMarkers/marker.png') }}';
+                @endswitch
 
-            // Create marker with custom icon
-            var marker = L.marker(new L.latLng(loc), {
-                title: title,
-                icon: customIcon // Set custom icon
-            });
-
-            markersLayer.addLayer(marker);
-
-            // Example of adding popup to spot marker (adjust as per your data structure)
-            var popupContent = "<div class='my-2'><img src='" + spot.image + "' class='img-fluid' width='700px'></div>" +
-                "<div class='my-2'><strong style='font-weight: bold;'>Nama Kepala Keluarga :</strong><br>" + spot.name + "</div>" +
-                "<div class='my-2'><strong style='font-weight: bold;'>Kontak WhatsApp :</strong><br>" + spot.kontaknowa + "</div>" +
-                "<div class='my-2'><strong style='font-weight: bold;'>Description :</strong><br>" + spot.description + "</div>";
-
-            // Example of adding popup with direction button
-            popupContent += "<div><button onclick='return keSini(\"" + loc + "\")' class='btn btn-outline-primary'>Direction</button></div>";
-
-            // Bind popup to spot marker
-            marker.bindPopup(popupContent);
-        }
-
-        @foreach ($spot as $item)
-            L.marker([{{ $item->coordinates }}])
+                L.marker([{{ $item->coordinates }}], {
+                    icon: L.icon({
+                        iconUrl: iconUrl,
+                        iconSize: [32, 32], // Adjust as needed
+                        iconAnchor: [16, 32], // Adjust as needed
+                        popupAnchor: [0, -32] // Adjust as needed
+                    })
+                })
                 .bindPopup(
                     "<div class='my-2'><img src='{{ $item->getImageAsset() }}' class='img-fluid' width='700px'></div>" +
                     "<div class='my-2'><strong style='font-weight: bold;'>Nama Kepala Keluarga :</strong><br>{{ $item->name }}</div>" +
@@ -285,7 +258,7 @@
                     "<div class='my-2'><button onclick='return keSini(\"{{ $item->coordinates }}\")' class='btn btn-primary btn-sm'><i class='fas fa-directions'></i> Direction</button></div>"
                 )
                 .addTo(map);
-        @endforeach
+            @endforeach
                 }
 
                 function updateMapCenter(selectElement) {
